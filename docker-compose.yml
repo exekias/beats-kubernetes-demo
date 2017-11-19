@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  app:
+    user: "1000"
+    image: exekias/beats-demo-app
+    volumes:
+      - ./app:/src/app
+
+  nginx:
+    image: exekias/beats-demo-nginx
+    ports:
+      - 8080:8080
+
+  mysql:
+    image: mysql:5.6
+    environment:
+      - MYSQL_ROOT_PASSWORD=foobar
+    volumes:
+      - db-data:/var/lib/mysql/data
+
+volumes:
+  db-data:
