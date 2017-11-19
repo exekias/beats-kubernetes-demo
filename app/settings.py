@@ -25,7 +25,7 @@ SECRET_KEY = 'v+5%)z_xw6t8n82w12klr0%9uq!33qd7oe!(8y4yxpn%)2rdu1'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'bootstrapform',
     'app.questions',
 ]
 

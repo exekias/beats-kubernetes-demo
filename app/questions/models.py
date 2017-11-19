@@ -4,8 +4,8 @@ from datetime import datetime
 
 class Question(models.Model):
 
-    message = models.CharField(max_length=140)
+    title = models.CharField('Question', help_text="Max 200 characters", max_length=200)
 
-    author = models.CharField(max_length=50)
+    author = models.CharField('Your name', max_length=50)
 
     pub_date = models.DateTimeField('date published', default=datetime.now)

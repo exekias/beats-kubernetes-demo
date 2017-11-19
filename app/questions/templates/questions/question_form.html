@@ -1,0 +1,9 @@
+{% extends "questions/base.html" %} {% load bootstrap %} {% block content %}
+<h4>Submit a question</h4>
+<p>The question will be added to the public list, users can then promote it by voting.</p>
+
+<form action="" method="post">{% csrf_token %} {{ form|bootstrap }}
+  <button type="submit" class="btn btn-primary float-right">Submit</button>
+</form>
+
+{% endblock content %}
