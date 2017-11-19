@@ -6,3 +6,8 @@ images:
 		docker build . -t exekias/beats-demo-$$image; \
 		cd -; \
 	done
+
+push:
+	for image in $(IMAGES); do \
+		docker push exekias/beats-demo-$$image; \
+	done
