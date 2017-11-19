@@ -2,7 +2,7 @@ from django.db import models
 from datetime import datetime
 
 
-class Message(models.Model):
+class Question(models.Model):
 
     message = models.CharField(max_length=140)
 
