@@ -28,6 +28,17 @@ class QuestionCreate(CreateView):
     fields = ['title', 'author']
     success_url = reverse_lazy('questions:index')
 
+    def form_valid(self, form):
+        # store author name
+        self.request.session['author'] = form.instance.author
+        return super(QuestionCreate, self).form_valid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super(QuestionCreate, self).get_form_kwargs()
+        author = self.request.session.get('author', '')
+        kwargs.get('initial', {})['author'] = author
+        return kwargs
+
 def vote(request, question_id):
     session_key = get_session_key(request)
     # Get question
