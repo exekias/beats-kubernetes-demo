@@ -3,11 +3,15 @@
 <p>This is the list of user submitted questions, sorted by number of votes. You can also <a href="/submit/">add a new question</a>.</p>
 
 {% for question in questions %}
-<div class="card">
+<div class="card" style="margin-bottom: 20px">
   <div class="card-body">
+    <a name="{{ question.id }}" />
     <h4 class="card-title">#{{ forloop.counter }} {{ question.title }}</h4>
-    <h6 class="card-subtitle mb-2 text-muted">97 votes, submitted by <strong>{{ question.author }}</strong></h6>
-    <button type="button" class="btn btn-primary float-right" aria-label="Vote up"><span class="fa fa-chevron-up" aria-hidden="true"></span> Vote</button>
+    <h6 class="card-subtitle mb-2 text-muted">
+      {{ question.num_votes }} votes, submitted <em>{{ question.pub_date|timesince}} ago</em> by <strong>{{ question.author }}</strong>
+    </h6> {% if question.id not in votes %}
+    <a href="{% url 'questions:vote' question_id=question.id %}" class="btn btn-primary float-right" aria-label="Vote up">
+      <span class="fa fa-chevron-up" aria-hidden="true"></span> Vote</a> {% endif %}
   </div>
 </div>
 {% empty %}
