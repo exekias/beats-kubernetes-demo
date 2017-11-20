@@ -83,8 +83,14 @@ MESSAGE_TAGS = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'beats_demo_app',
+        'USER': 'beats',
+        'PASSWORD': 'foobar',
+        'HOST': 'mysql',
+        'OPTIONS': {
+            'init_command': 'SET default_storage_engine=INNODB',
+        },
     }
 }
 
