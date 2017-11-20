@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: beats-demo
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: beats-demo
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: beats-demo
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: beats-demo
+  template:
+    metadata:
+      labels:
+        app: beats-demo
+    spec:
+      containers:
+      - image: exekias/beats-demo-app
+        imagePullPolicy: Always
+        name: app
+        resources:
+          limits:
+            cpu: 100m
+      - image: exekias/beats-demo-nginx
+        imagePullPolicy: Always
+        name: nginx
+        resources:
+          limits:
+            cpu: 100m
+        ports:
+        - containerPort: 8080
+      hostAliases:
+      - ip: 127.0.0.1
+        hostnames:
+        - app
+---
+# Create tables on first run:
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: beats-demo-app-init
+spec:
+  backoffLimit: 6
+  activeDeadlineSeconds: 300
+  template:
+    metadata:
+      labels:
+        app: beats-demo
+    spec:
+      containers:
+      - name: app
+        image: exekias/beats-demo-app
+        command: ["django-admin",  "migrate"]
+      restartPolicy: Never

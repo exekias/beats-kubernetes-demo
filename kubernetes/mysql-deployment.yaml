@@ -39,9 +39,15 @@ spec:
       - image: mysql:5.6
         name: mysql
         env:
+        - name: MYSQL_DATABASE
+          value: beats_demo_app
           # Use secret in real usage
-        - name: MYSQL_ROOT_PASSWORD
+        - name: MYSQL_PASSWORD
           value: foobar
+        - name: MYSQL_USER
+          value: beats
+        - name: MYSQL_RANDOM_ROOT_PASSWORD
+          value: "yes"
         ports:
         - containerPort: 3306
           name: mysql
