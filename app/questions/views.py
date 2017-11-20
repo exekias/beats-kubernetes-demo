@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Count
+from django.http import HttpResponseBadRequest
 
 from .models import Question, QuestionVote
 
@@ -46,7 +47,7 @@ def vote(request, question_id):
         question = Question.objects.get(pk=question_id)
     except Question.DoesNotExist:
         messages.add_message(request, messages.ERROR, 'Given question doesn\'t exist')
-        return redirect('questions:index')
+        return HttpResponseBadRequest('Given question doesn\'t exist')
 
     try:
         vote = QuestionVote(question=question, session_key=session_key)
@@ -54,4 +55,6 @@ def vote(request, question_id):
         vote.save()
     except  ValidationError:
         messages.add_message(request, messages.ERROR, 'Error voting question, voted twice?')
+        return HttpResponseBadRequest('Error voting question, voted twice?')
+
     return redirect('questions:index')
