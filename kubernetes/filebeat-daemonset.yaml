@@ -9,14 +9,33 @@ metadata:
     kubernetes.io/cluster-service: "true"
 data:
   filebeat.yml: |-
-    filebeat.config:
-      prospectors:
-        path: ${path.config}/prospectors.d/*.yml
-      modules:
-        path: ${path.config}/modules.d/*.yml
+    filebeat.prospectors:
+      - type: docker
+        containers.ids:
+          - '*'
+
+    filebeat.autodiscover:
+      providers:
+        - type: docker
+          templates:
+            - condition.regexp:
+                docker.container.image: 'nginx.*'
+              config:
+                - module: nginx
+                  access:
+                    prospector:
+                      type: docker
+                      containers.ids:
+                        - ${data.docker.container.id}
+                  error:
+                    prospector:
+                      type: docker
+                      containers.ids:
+                        - ${data.docker.container.id}
 
     processors:
       - add_cloud_metadata:
+      - add_kubernetes_metadata:
 
     output.elasticsearch:
       hosts: ['${ELASTICSEARCH_HOST:elasticsearch}:${ELASTICSEARCH_PORT:9200}']
@@ -27,26 +46,6 @@ data:
       host: ${KIBANA_HOST}
       username: ${ELASTIC_USERNAME}
       password: ${ELASTIC_PASSWORD}
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: filebeat-prospectors
-  namespace: kube-system
-  labels:
-    k8s-app: filebeat
-    kubernetes.io/cluster-service: "true"
-data:
-  kubernetes.yml: |-
-    - type: log
-      paths:
-        - /var/lib/docker/containers/*/*.log
-      json.message_key: log
-      json.keys_under_root: true
-      processors:
-        - add_kubernetes_metadata:
-            in_cluster: true
-            namespace: ${POD_NAMESPACE}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -67,7 +66,8 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
       - name: filebeat
-        image: docker.elastic.co/beats/filebeat:6.0.0
+        image: exekias/filebeat:6.1-snapshot-20171121
+        imagePullPolicy: Always
         args: [
           "-c", "/etc/filebeat.yml",
           "-e",
@@ -98,10 +98,6 @@ spec:
             secretKeyRef:
               name: elastic
               key: ELASTIC_PASSWORD
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
         securityContext:
           runAsUser: 0
         resources:
@@ -115,14 +111,13 @@ spec:
           mountPath: /etc/filebeat.yml
           readOnly: true
           subPath: filebeat.yml
-        - name: prospectors
-          mountPath: /usr/share/filebeat/prospectors.d
-          readOnly: true
         - name: data
           mountPath: /usr/share/filebeat/data
         - name: varlibdockercontainers
           mountPath: /var/lib/docker/containers
           readOnly: true
+        - name: dockersock
+          mountPath: /var/run/docker.sock
       volumes:
       - name: config
         configMap:
@@ -131,10 +126,9 @@ spec:
       - name: varlibdockercontainers
         hostPath:
           path: /var/lib/docker/containers
-      - name: prospectors
-        configMap:
-          defaultMode: 0600
-          name: filebeat-prospectors
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
       - name: data
         emptyDir: {}
 ---
@@ -152,7 +146,8 @@ spec:
       restartPolicy: Never
       containers:
       - name: filebeat
-        image: docker.elastic.co/beats/filebeat:6.0.0
+        imagePullPolicy: Always
+        image: exekias/filebeat:6.1-snapshot-20171121
         args: [
           "-c", "/etc/filebeat.yml",
           "-e",
