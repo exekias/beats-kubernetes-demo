@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SECRET_KEY = 'v+5%)z_xw6t8n82w12klr0%9uq!33qd7oe!(8y4yxpn%)2rdu1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -84,9 +84,9 @@ MESSAGE_TAGS = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'beats_demo_app',
-        'USER': 'beats',
-        'PASSWORD': 'foobar',
+        'NAME': os.environ.get('MYSQL_DATABASE', 'beats_demo_app'),
+        'USER': os.environ.get('MYSQL_USER', 'beats'),
+        'PASSWORD': os.environ.get('MYSQL_PASSWORD', 'foobar'),
         'HOST': 'mysql',
         'OPTIONS': {
             'init_command': 'SET default_storage_engine=INNODB',

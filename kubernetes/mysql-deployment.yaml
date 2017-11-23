@@ -41,15 +41,17 @@ spec:
         env:
         - name: MYSQL_DATABASE
           value: beats_demo_app
-          # TODO: Use a secret in manifests
-        - name: MYSQL_PASSWORD
-          value: foobar
         - name: MYSQL_USER
           value: beats
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: beats-demo
+              key: MYSQL_PASSWORD
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: elastic
+              name: beats-demo
               key: MYSQL_ROOT_PASSWORD
         ports:
         - containerPort: 3306

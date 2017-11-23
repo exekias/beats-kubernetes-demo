@@ -33,6 +33,12 @@ spec:
         resources:
           limits:
             cpu: 100m
+        env:
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: beats-demo
+              key: MYSQL_PASSWORD
       - image: exekias/beats-demo-nginx
         imagePullPolicy: Always
         name: nginx
@@ -59,8 +65,14 @@ spec:
       labels:
         app: beats-demo
     spec:
+      restartPolicy: Never
       containers:
       - name: app
         image: exekias/beats-demo-app
         command: ["django-admin",  "migrate"]
-      restartPolicy: Never
+        env:
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: beats-demo
+              key: MYSQL_PASSWORD
