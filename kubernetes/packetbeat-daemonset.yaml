@@ -1,0 +1,223 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: packetbeat-config
+  namespace: kube-system
+  labels:
+    k8s-app: packetbeat
+    kubernetes.io/cluster-service: "true"
+data:
+  packetbeat.yml: |-
+    packetbeat.interfaces.device: any
+
+    packetbeat.protocols:
+    - type: dns
+      ports: [53]
+      include_authorities: true
+      include_additionals: true
+
+    - type: http
+      ports: [8080]
+
+    - type: mysql
+      ports: [3306]
+
+    processors:
+      - add_cloud_metadata:
+      - add_kubernetes_metadata:
+          host: ${HOSTNAME}
+    #      indexers:
+    #      - ip_port:
+    #      matchers:
+    #      - field_format:
+    #          format: '%{[ip]}:%{[port]}'
+
+    output.elasticsearch:
+      hosts: ['${ELASTICSEARCH_HOST}:${ELASTICSEARCH_PORT}']
+      username: ${ELASTIC_USERNAME}
+      password: ${ELASTIC_PASSWORD}
+
+    setup.kibana:
+      host: ${KIBANA_HOST}
+      username: ${ELASTIC_USERNAME}
+      password: ${ELASTIC_PASSWORD}
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: packetbeat
+  namespace: kube-system
+  labels:
+    k8s-app: packetbeat
+    kubernetes.io/cluster-service: "true"
+spec:
+  template:
+    metadata:
+      labels:
+        k8s-app: packetbeat
+        kubernetes.io/cluster-service: "true"
+    spec:
+      serviceAccountName: packetbeat
+      terminationGracePeriodSeconds: 30
+      hostNetwork: true
+      containers:
+      - name: packetbeat
+        image: exekias/packetbeat:6.1-snapshot-20171124-k8s
+        imagePullPolicy: Always
+        args: [
+          "-c", "/etc/packetbeat.yml",
+          "-e",
+        ]
+        securityContext:
+          runAsUser: 0
+          capabilities:
+            add:
+            - NET_ADMIN
+        env:
+        - name: ELASTICSEARCH_HOST
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTICSEARCH_HOST
+        - name: ELASTICSEARCH_PORT
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTICSEARCH_PORT
+        - name: KIBANA_HOST
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: KIBANA_HOST
+        - name: ELASTIC_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTIC_USERNAME
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTIC_PASSWORD
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - name: config
+          mountPath: /etc/packetbeat.yml
+          readOnly: true
+          subPath: packetbeat.yml
+        - name: data
+          mountPath: /usr/share/packetbeat/data
+      volumes:
+      - name: config
+        configMap:
+          defaultMode: 0600
+          name: packetbeat-config
+      - name: data
+        emptyDir: {}
+---
+# Run packetbeat setup
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: packetbeat-setup
+  namespace: kube-system
+spec:
+  backoffLimit: 6
+  activeDeadlineSeconds: 300
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: packetbeat
+        imagePullPolicy: Always
+        image: exekias/packetbeat:6.1-snapshot-20171124-k8s
+        args: [
+          "-c", "/etc/packetbeat.yml",
+          "-e",
+          "setup",
+        ]
+        securityContext:
+          runAsUser: 0
+          capabilities:
+            add:
+            - NET_ADMIN
+        env:
+        - name: ELASTICSEARCH_HOST
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTICSEARCH_HOST
+        - name: ELASTICSEARCH_PORT
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTICSEARCH_PORT
+        - name: KIBANA_HOST
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: KIBANA_HOST
+        - name: ELASTIC_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTIC_USERNAME
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTIC_PASSWORD
+        volumeMounts:
+        - name: config
+          mountPath: /etc/packetbeat.yml
+          readOnly: true
+          subPath: packetbeat.yml
+      volumes:
+      - name: config
+        configMap:
+          defaultMode: 0600
+          name: packetbeat-config
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: packetbeat
+subjects:
+- kind: ServiceAccount
+  name: packetbeat
+  namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: packetbeat
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: packetbeat
+  labels:
+    k8s-app: packetbeat
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources:
+  - namespaces
+  - pods
+  verbs:
+  - get
+  - watch
+  - list
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: packetbeat
+  namespace: kube-system
+  labels:
+    k8s-app: packetbeat
+---
