@@ -30,7 +30,6 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -42,9 +41,17 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bootstrapform',
     'app.questions',
+    'elasticapm.contrib.django',
 ]
 
+ELASTIC_APM = {
+   'APP_NAME': 'beats-demo',
+   'SERVER': 'http://%s:8200' % os.environ.get('APM_SERVER_HOST', 'apm'),
+   #'SECRET_TOKEN': '<SECRET-TOKEN>',
+}
+
 MIDDLEWARE = [
+    'elasticapm.contrib.django.middleware.TracingMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

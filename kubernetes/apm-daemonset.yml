@@ -1,0 +1,206 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apm-server-config
+  namespace: kube-system
+  labels:
+    k8s-app: apm-server
+    kubernetes.io/cluster-service: "true"
+data:
+  apm-server.yml: |-
+    apm-server:
+      host: 0.0.0.0:8200
+
+    processors:
+    - add_kubernetes_metadata:
+        indexers:
+        - ip_port:
+        matchers:
+        - fields:
+            lookup_fields: ["context.system.ip"]
+
+    output.elasticsearch:
+      hosts: ['${ELASTICSEARCH_HOST}:${ELASTICSEARCH_PORT}']
+      username: ${ELASTIC_USERNAME}
+      password: ${ELASTIC_PASSWORD}
+
+    setup.kibana:
+      host: ${KIBANA_HOST}
+      username: ${ELASTIC_USERNAME}
+      password: ${ELASTIC_PASSWORD}
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: apm-server
+  namespace: kube-system
+  labels:
+    k8s-app: apm-server
+    kubernetes.io/cluster-service: "true"
+spec:
+  template:
+    metadata:
+      labels:
+        k8s-app: apm-server
+        kubernetes.io/cluster-service: "true"
+    spec:
+      serviceAccountName: apm-server
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: apm-server
+        image:  exekias/apm-server:6.0-system.ip
+        imagePullPolicy: Always
+        args: [
+          "-c", "/etc/apm-server.yml",
+          "-e",
+        ]
+        ports:
+        - containerPort: 8200
+          hostPort: 8200
+        env:
+        - name: ELASTICSEARCH_HOST
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTICSEARCH_HOST
+        - name: ELASTICSEARCH_PORT
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTICSEARCH_PORT
+        - name: KIBANA_HOST
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: KIBANA_HOST
+        - name: ELASTIC_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTIC_USERNAME
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTIC_PASSWORD
+        securityContext:
+          runAsUser: 0
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - name: config
+          mountPath: /etc/apm-server.yml
+          readOnly: true
+          subPath: apm-server.yml
+        - name: data
+          mountPath: /usr/share/apm-server/data
+      volumes:
+      - name: config
+        configMap:
+          defaultMode: 0600
+          name: apm-server-config
+      - name: data
+        emptyDir: {}
+---
+# Run apm-server setup
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: apm-server-setup
+  namespace: kube-system
+spec:
+  backoffLimit: 6
+  activeDeadlineSeconds: 300
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: apm-server
+        imagePullPolicy: Always
+        image:  exekias/apm-server:6.0-system.ip
+        args: [
+          "-c", "/etc/apm-server.yml",
+          "-e",
+          "setup",
+        ]
+        env:
+        - name: ELASTICSEARCH_HOST
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTICSEARCH_HOST
+        - name: ELASTICSEARCH_PORT
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTICSEARCH_PORT
+        - name: KIBANA_HOST
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: KIBANA_HOST
+        - name: ELASTIC_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTIC_USERNAME
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTIC_PASSWORD
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: config
+          mountPath: /etc/apm-server.yml
+          readOnly: true
+          subPath: apm-server.yml
+      volumes:
+      - name: config
+        configMap:
+          defaultMode: 0600
+          name: apm-server-config
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: apm-server
+subjects:
+- kind: ServiceAccount
+  name: apm-server
+  namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: apm-server
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: apm-server
+  labels:
+    k8s-app: apm-server
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources:
+  - namespaces
+  - pods
+  verbs:
+  - get
+  - watch
+  - list
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: apm-server
+  namespace: kube-system
+  labels:
+    k8s-app: apm-server
+---
