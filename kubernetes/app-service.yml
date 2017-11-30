@@ -4,6 +4,7 @@ metadata:
   name: beats-demo
 spec:
   type: LoadBalancer
+  loadBalancerIP: 35.184.104.118
   # Avoid NAT to get source IP:
   externalTrafficPolicy: Local
   ports:
