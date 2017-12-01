@@ -24,6 +24,9 @@ def index(request):
     }
     return render(request, 'questions/index.html', context)
 
+def about(request):
+    return render(request, 'questions/about.html', {})
+
 class QuestionCreate(CreateView):
     model = Question
     fields = ['title', 'author']
