@@ -187,11 +187,16 @@ spec:
           mountPath: /etc/filebeat.yml
           readOnly: true
           subPath: filebeat.yml
+        - name: dockersock
+          mountPath: /var/run/docker.sock
       volumes:
       - name: config
         configMap:
           defaultMode: 0600
           name: filebeat-config
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding

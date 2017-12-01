@@ -203,7 +203,7 @@ spec:
       containers:
       - name: metricbeat-setup
         imagePullPolicy: Always
-        image: exekias/metricbeat:6.1-snapshot-20171121
+        image: exekias/metricbeat:6.1-snapshot-20171121-k8s
         args: [
           "-c", "/etc/metricbeat.yml",
           "-e",
@@ -242,7 +242,12 @@ spec:
           mountPath: /etc/metricbeat.yml
           readOnly: true
           subPath: metricbeat.yml
+        - name: dockersock
+          mountPath: /var/run/docker.sock
       volumes:
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
       - name: config
         configMap:
           defaultMode: 0600
