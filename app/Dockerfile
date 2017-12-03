@@ -10,4 +10,4 @@ ADD requirements.txt /src/app/
 RUN pip install -r requirements.txt
 ADD . /src/app/
 
-CMD ["uwsgi", "--socket", ":8081", "--wsgi-file", "wsgi.py"]
+CMD ["uwsgi", "--socket", ":8081", "-T", "--wsgi-file", "wsgi.py"]
