@@ -33,6 +33,18 @@ data:
         - drop_event.when.regexp:
             system.filesystem.mount_point: '^/(sys|cgroup|proc|dev|etc|host|lib)($|/)'
 
+      - module: docker
+        metricsets:
+          - container
+          - cpu
+          - diskio
+          - healthcheck
+          - info
+          - memory
+          - network
+        hosts: ["unix:///var/run/docker.sock"]
+        period: 10s
+
       - module: kubernetes
         period: 10s
         metricsets:
