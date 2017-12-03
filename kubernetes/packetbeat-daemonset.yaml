@@ -27,11 +27,6 @@ data:
       - add_cloud_metadata:
       - add_kubernetes_metadata:
           host: ${HOSTNAME}
-    #      indexers:
-    #      - ip_port:
-    #      matchers:
-    #      - field_format:
-    #          format: '%{[ip]}:%{[port]}'
 
     output.elasticsearch:
       hosts: ['${ELASTICSEARCH_HOST}:${ELASTICSEARCH_PORT}']
