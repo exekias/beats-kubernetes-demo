@@ -22,3 +22,7 @@ Everything is monitored using Beats and <a href="https://www.elastic.co/guide/en
  * <a href="https://www.elastic.co/guide/en/beats/metricbeat/6.0/running-on-kubernetes.html">Metricbeat</a> ships system metrics for all nodes in the cluster and Kubernetes metrics on containers resource consumption and state
  * <a href="https://www.elastic.co/guide/en/beats/packetbeat/6.0/index.html">Packetbeat</a> monitors the network and applications by sniffing packets
  * <a href="https://www.elastic.co/guide/en/apm/get-started/master/index.html">Elastic APM</a> gather tracing timing data from your applications
+
+ Example dashboard
+ -----------------
+![Example dashboard](dashboard-screenshot.png "Example dashboard")
