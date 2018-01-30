@@ -58,7 +58,7 @@ spec:
       hostNetwork: true
       containers:
       - name: packetbeat
-        image: exekias/packetbeat:6.1-snapshot-20171124-k8s
+        image: exekias/packetbeat:6.2-snapshot-20180130
         imagePullPolicy: Always
         args: [
           "-c", "/etc/packetbeat.yml",
@@ -123,7 +123,6 @@ metadata:
   name: packetbeat-setup
   namespace: kube-system
 spec:
-  backoffLimit: 6
   activeDeadlineSeconds: 300
   template:
     spec:
@@ -131,7 +130,7 @@ spec:
       containers:
       - name: packetbeat
         imagePullPolicy: Always
-        image: exekias/packetbeat:6.1-snapshot-20171124-k8s
+        image: exekias/packetbeat:6.2-snapshot-20180130
         args: [
           "-c", "/etc/packetbeat.yml",
           "-e",

@@ -48,7 +48,6 @@ kind: Job
 metadata:
   name: beats-demo-app-init
 spec:
-  backoffLimit: 6
   activeDeadlineSeconds: 300
   template:
     metadata:

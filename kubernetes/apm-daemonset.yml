@@ -114,7 +114,6 @@ metadata:
   name: apm-server-setup
   namespace: kube-system
 spec:
-  backoffLimit: 6
   activeDeadlineSeconds: 300
   template:
     spec:

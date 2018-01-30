@@ -67,7 +67,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
       - name: filebeat
-        image: exekias/filebeat:6.1-snapshot-20171121
+        image: exekias/filebeat:6.2.0-snapshot-20180130
         imagePullPolicy: Always
         args: [
           "-c", "/etc/filebeat.yml",
@@ -140,7 +140,6 @@ metadata:
   name: filebeat-setup
   namespace: kube-system
 spec:
-  backoffLimit: 6
   activeDeadlineSeconds: 300
   template:
     spec:
@@ -148,7 +147,7 @@ spec:
       containers:
       - name: filebeat
         imagePullPolicy: Always
-        image: exekias/filebeat:6.1-snapshot-20171121
+        image: exekias/filebeat:6.2.0-snapshot-20180130
         args: [
           "-c", "/etc/filebeat.yml",
           "-e",

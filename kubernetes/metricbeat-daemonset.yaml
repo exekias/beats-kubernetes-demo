@@ -124,7 +124,7 @@ spec:
       hostNetwork: true
       containers:
       - name: metricbeat
-        image: exekias/metricbeat:6.1-snapshot-20171121-k8s
+        image: exekias/metricbeat:6.2-snapshot-20180130
         imagePullPolicy: Always
         args: [
           "-c", "/etc/metricbeat.yml",
@@ -207,7 +207,6 @@ metadata:
   name: metricbeat-setup
   namespace: kube-system
 spec:
-  backoffLimit: 6
   activeDeadlineSeconds: 300
   template:
     spec:
@@ -215,7 +214,7 @@ spec:
       containers:
       - name: metricbeat-setup
         imagePullPolicy: Always
-        image: exekias/metricbeat:6.1-snapshot-20171121-k8s
+        image: exekias/metricbeat:6.2-snapshot-20180130
         args: [
           "-c", "/etc/metricbeat.yml",
           "-e",
