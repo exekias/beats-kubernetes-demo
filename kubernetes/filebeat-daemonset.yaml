@@ -18,8 +18,8 @@ data:
       providers:
         - type: docker
           templates:
-            - condition.regexp:
-                docker.container.image: 'nginx.*'
+            - condition.contains:
+                docker.container.image: nginx
               config:
                 - module: nginx
                   access:

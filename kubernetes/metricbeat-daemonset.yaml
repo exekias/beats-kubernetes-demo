@@ -60,7 +60,7 @@ data:
         - type: kubernetes
           host: ${HOSTNAME}
           templates:
-            - condition.regexp:
+            - condition.contains:
                 kubernetes.container.name: mysql
               config:
                 - module: mysql
@@ -70,7 +70,7 @@ data:
                   username: root
                   password: ${MYSQL_ROOT_PASSWORD}
 
-            - condition.regexp:
+            - condition.contains:
                 kubernetes.container.name: nginx
               config:
                 - module: nginx
@@ -78,7 +78,7 @@ data:
                   metricsets: ["stubstatus"]
                   hosts: ["${data.host}:8080"]
 
-            - condition.regexp:
+            - condition.contains:
                 kubernetes.container.name: kube-state-metrics
               config:
                 - module: kubernetes
