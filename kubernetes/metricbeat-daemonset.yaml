@@ -124,7 +124,7 @@ spec:
       hostNetwork: true
       containers:
       - name: metricbeat
-        image: exekias/metricbeat:6.2-snapshot-20180130
+        image: docker.elastic.co/beats/metricbeat:6.2.0
         imagePullPolicy: Always
         args: [
           "-c", "/etc/metricbeat.yml",
@@ -214,7 +214,7 @@ spec:
       containers:
       - name: metricbeat-setup
         imagePullPolicy: Always
-        image: exekias/metricbeat:6.2-snapshot-20180130
+        image: docker.elastic.co/beats/metricbeat:6.2.0
         args: [
           "-c", "/etc/metricbeat.yml",
           "-e",
