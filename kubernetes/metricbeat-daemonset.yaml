@@ -78,19 +78,6 @@ data:
                   metricsets: ["stubstatus"]
                   hosts: ["${data.host}:8080"]
 
-            - condition.contains:
-                kubernetes.container.name: kube-state-metrics
-              config:
-                - module: kubernetes
-                  period: 10s
-                  metricsets:
-                    - state_node
-                    - state_deployment
-                    - state_replicaset
-                    - state_pod
-                    - state_container
-                  hosts: ["${data.host}:8080"]
-
     processors:
       - add_cloud_metadata:
 
@@ -199,6 +186,105 @@ spec:
           name: metricbeat-config
       - name: data
         emptyDir: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: metricbeat-deployment-config
+  namespace: kube-system
+  labels:
+    k8s-app: metricbeat
+    kubernetes.io/cluster-service: "true"
+data:
+  metricbeat.yml: |-
+    metricbeat.modules:
+      # This module requires `kube-state-metrics` up and running under `kube-system` namespace
+      - module: kubernetes
+        metricsets:
+          - state_node
+          - state_deployment
+          - state_replicaset
+          - state_pod
+          - state_container
+        period: 10s
+        hosts: ["kube-state-metrics:8080"]
+
+    processors:
+      - add_cloud_metadata:
+
+    output.elasticsearch:
+      hosts: ['${ELASTICSEARCH_HOST}:${ELASTICSEARCH_PORT}']
+      username: ${ELASTIC_USERNAME}
+      password: ${ELASTIC_PASSWORD}
+---
+# Deploy singleton instance in the whole cluster for some unique data sources, like kube-state-metrics
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: metricbeat
+  namespace: kube-system
+  labels:
+    k8s-app: metricbeat
+    kubernetes.io/cluster-service: "true"
+spec:
+  template:
+    metadata:
+      labels:
+        k8s-app: metricbeat
+        kubernetes.io/cluster-service: "true"
+    spec:
+      containers:
+      - name: metricbeat
+        image: docker.elastic.co/beats/metricbeat:6.2.0
+        imagePullPolicy: Always
+        args: [
+          "-c", "/etc/metricbeat.yml",
+          "-e",
+        ]
+        env:
+        - name: ELASTICSEARCH_HOST
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTICSEARCH_HOST
+        - name: ELASTICSEARCH_PORT
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTICSEARCH_PORT
+        - name: KIBANA_HOST
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: KIBANA_HOST
+        - name: ELASTIC_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTIC_USERNAME
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: elastic
+              key: ELASTIC_PASSWORD
+        securityContext:
+          runAsUser: 0
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - name: config
+          mountPath: /etc/metricbeat.yml
+          readOnly: true
+          subPath: metricbeat.yml
+      volumes:
+      - name: config
+        configMap:
+          defaultMode: 0600
+          name: metricbeat-deployment-config
 ---
 # Run metricbeat setup
 apiVersion: batch/v1
