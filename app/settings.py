@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bootstrapform',
     'app.questions',
-    'elasticapm.contrib.django',
+#    'elasticapm.contrib.django',
 ]
 
 ELASTIC_APM = {
@@ -51,7 +51,7 @@ ELASTIC_APM = {
 }
 
 MIDDLEWARE = [
-    'elasticapm.contrib.django.middleware.TracingMiddleware',
+#    'elasticapm.contrib.django.middleware.TracingMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
