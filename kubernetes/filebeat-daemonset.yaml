@@ -9,34 +9,13 @@ metadata:
     kubernetes.io/cluster-service: "true"
 data:
   filebeat.yml: |-
-    filebeat.prospectors:
-      - type: docker
-        containers.ids:
-          - '*'
-
     filebeat.autodiscover:
       providers:
-        - type: docker
-          templates:
-            - condition.contains:
-                docker.container.image: nginx
-              config:
-                - module: nginx
-                  access:
-                    prospector:
-                      type: docker
-                      containers.ids:
-                        - ${data.docker.container.id}
-                  error:
-                    prospector:
-                      type: docker
-                      containers.ids:
-                        - ${data.docker.container.id}
+        - type: kubernetes
+          hints.enabled: true
 
     processors:
       - add_cloud_metadata:
-      - add_kubernetes_metadata:
-      - add_docker_metadata:
 
     output.elasticsearch:
       hosts: ['${ELASTICSEARCH_HOST}:${ELASTICSEARCH_PORT}']
@@ -67,7 +46,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
       - name: filebeat
-        image: docker.elastic.co/beats/filebeat:6.2.0
+        image: exekias/filebeat:6.3.0
         imagePullPolicy: Always
         args: [
           "-c", "/etc/filebeat.yml",
@@ -147,7 +126,7 @@ spec:
       containers:
       - name: filebeat
         imagePullPolicy: Always
-        image: docker.elastic.co/beats/filebeat:6.2.0
+        image: exekias/filebeat:6.3.0
         args: [
           "-c", "/etc/filebeat.yml",
           "-e",

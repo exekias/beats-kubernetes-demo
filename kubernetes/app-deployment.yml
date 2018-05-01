@@ -11,6 +11,10 @@ spec:
     metadata:
       labels:
         app: beats-demo
+      annotations:
+        co.elastic.logs.nginx/module: nginx
+        co.elastic.logs.nginx/fileset.stdout: access
+        co.elastic.logs.nginx/fileset.stderr: error
     spec:
       containers:
       - image: exekias/beats-demo-app
