@@ -18,7 +18,7 @@ spec:
         name: app
         resources:
           limits:
-            cpu: 500m
+            cpu: 200m
         env:
         - name: APM_SERVER_HOST
           valueFrom:
@@ -34,7 +34,7 @@ spec:
         name: nginx
         resources:
           limits:
-            cpu: 200m
+            cpu: 100m
         ports:
         - containerPort: 8080
       hostAliases:
