@@ -15,6 +15,9 @@ spec:
         co.elastic.logs.nginx/module: nginx
         co.elastic.logs.nginx/fileset.stdout: access
         co.elastic.logs.nginx/fileset.stderr: error
+        co.elastic.metrics.nginx/module: nginx
+        co.elastic.metrics.nginx/period: 10s
+        co.elastic.metrics.nginx/hosts: "${data.host}:8080"
     spec:
       containers:
       - image: exekias/beats-demo-app
