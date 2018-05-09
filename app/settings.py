@@ -41,17 +41,17 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bootstrapform',
     'app.questions',
-#    'elasticapm.contrib.django',
+    'elasticapm.contrib.django',
 ]
 
 ELASTIC_APM = {
-   'APP_NAME': 'beats-demo',
-   'SERVER': 'http://%s:8200' % os.environ.get('APM_SERVER_HOST', 'apm'),
+   'SERVICE_NAME': 'beats-demo',
+   'SERVER_URL': 'http://%s:8200' % os.environ.get('APM_SERVER_HOST', 'apm'),
    #'SECRET_TOKEN': '<SECRET-TOKEN>',
 }
 
 MIDDLEWARE = [
-#    'elasticapm.contrib.django.middleware.TracingMiddleware',
+    'elasticapm.contrib.django.middleware.TracingMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

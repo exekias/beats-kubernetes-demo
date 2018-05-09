@@ -226,6 +226,7 @@ spec:
         k8s-app: metricbeat
         kubernetes.io/cluster-service: "true"
     spec:
+      serviceAccountName: metricbeat
       containers:
       - name: metricbeat
         image: exekias/metricbeat:6.3.0

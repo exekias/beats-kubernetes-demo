@@ -49,7 +49,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
       - name: apm-server
-        image:  exekias/apm-server:6.0-system.ip
+        image:  exekias/apm-server:6.3.0
         imagePullPolicy: Always
         args: [
           "-c", "/etc/apm-server.yml",
@@ -118,10 +118,11 @@ spec:
   template:
     spec:
       restartPolicy: Never
+      serviceAccountName: apm-server
       containers:
       - name: apm-server
         imagePullPolicy: Always
-        image:  exekias/apm-server:6.0-system.ip
+        image:  exekias/apm-server:6.3.0
         args: [
           "-c", "/etc/apm-server.yml",
           "-e",
