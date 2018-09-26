@@ -58,7 +58,7 @@ spec:
       hostNetwork: true
       containers:
       - name: packetbeat
-        image: docker.elastic.co/beats/packetbeat:6.2.0
+        image: docker.elastic.co/beats/packetbeat:6.4.1
         imagePullPolicy: Always
         args: [
           "-c", "/etc/packetbeat.yml",
@@ -126,11 +126,12 @@ spec:
   activeDeadlineSeconds: 300
   template:
     spec:
+      serviceAccountName: packetbeat
       restartPolicy: Never
       containers:
       - name: packetbeat
         imagePullPolicy: Always
-        image: docker.elastic.co/beats/packetbeat:6.2.0
+        image: docker.elastic.co/beats/packetbeat:6.4.1
         args: [
           "-c", "/etc/packetbeat.yml",
           "-e",

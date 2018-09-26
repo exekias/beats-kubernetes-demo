@@ -46,7 +46,7 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
       - name: filebeat
-        image: exekias/filebeat:6.3.0
+        image: docker.elastic.co/beats/filebeat:6.4.1
         imagePullPolicy: Always
         args: [
           "-c", "/etc/filebeat.yml",
@@ -126,7 +126,7 @@ spec:
       containers:
       - name: filebeat
         imagePullPolicy: Always
-        image: exekias/filebeat:6.3.0
+        image: docker.elastic.co/beats/filebeat:6.4.1
         args: [
           "-c", "/etc/filebeat.yml",
           "-e",
